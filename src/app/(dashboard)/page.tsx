@@ -5,6 +5,8 @@ import styled, { keyframes } from 'styled-components';
 import { Slider } from 'antd';
 import 'antd/dist/reset.css';
 import DelayedFilter, { delayedFilterFragments } from '@/components/DelayedFilter';
+import { Typography } from 'antd';
+const { Text } = Typography;
 
 // 响应式尺寸配置 - 使用 Tailwind 断点
 const responsiveSizes = {
@@ -107,11 +109,7 @@ const SliderContainer = styled.div`
   }
 
   .ant-slider-handle {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.1s ease;
-    border: 2px solid #3b82f6;
-    background: #ffffff;
-
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     &:hover,
     &:focus {
       transform: scale(1.1);
@@ -326,11 +324,11 @@ const TabBarPage: React.FC = () => {
 
           {/* 刻度标记 */}
           <ScaleMarks>
-            <span>0</span>
-            <span>25</span>
-            <span>50</span>
-            <span>75</span>
-            <span>100</span>
+            <MarkFont>0</MarkFont>
+            <MarkFont>25</MarkFont>
+            <MarkFont>50</MarkFont>
+            <MarkFont>75</MarkFont>
+            <MarkFont>100</MarkFont>
           </ScaleMarks>
         </SliderContainer>
       </MainContent>
@@ -339,3 +337,9 @@ const TabBarPage: React.FC = () => {
 };
 
 export default TabBarPage;
+
+const MarkFont = styled(Text)`
+  font-size: 1rem;
+  color: white;
+  font-weight: 600;
+`;
