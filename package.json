@@ -9,8 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/lodash": "^4.17.19",
     "@types/styled-components": "^5.1.34",
     "antd": "^5.26.2",
+    "framer-motion": "^12.19.2",
+    "lodash": "^4.17.21",
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

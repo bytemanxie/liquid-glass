@@ -24,7 +24,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const menuItems = [
     {
       value: '/',
-      label: '基础效果',
+      label: 'TabBar滤镜',
       icon: <ViewModuleIcon />,
     },
     {
@@ -36,11 +36,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       value: '/playground',
       label: '效果实验室',
       icon: <ControlPlatformIcon />,
-    },
-    {
-      value: '/tabbar',
-      label: 'Tab栏滤镜',
-      icon: <ViewModuleIcon />,
     },
   ];
 
