@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Button, Space, Tag } from 'tdesign-react';
+import { Card, Tag } from 'tdesign-react';
 import { LayersIcon, TipsIcon, PlayCircleIcon } from 'tdesign-icons-react';
 import LiquidGlass, { physicsPresets } from '@/components/LiquidGlass';
 
@@ -36,7 +36,7 @@ export default function EnhancedPage() {
                 width={250}
                 height={150}
                 className="w-full h-full"
-                draggable={false}
+                draggable={true}
               />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
@@ -64,7 +64,7 @@ export default function EnhancedPage() {
                 width={250}
                 height={150}
                 className="w-full h-full"
-                draggable={false}
+                draggable={true}
               />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
@@ -92,7 +92,7 @@ export default function EnhancedPage() {
                 width={250}
                 height={150}
                 className="w-full h-full"
-                draggable={false}
+                draggable={true}
               />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
@@ -120,7 +120,7 @@ export default function EnhancedPage() {
                 width={250}
                 height={150}
                 className="w-full h-full"
-                draggable={false}
+                draggable={true}
               />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
@@ -148,135 +148,13 @@ export default function EnhancedPage() {
                 width={250}
                 height={150}
                 className="w-full h-full"
-                draggable={false}
+                draggable={true}
               />
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
                   🍯 粘稠效果
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* 可拖拽物理效果 */}
-        <Card title="可拖拽物理效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-indigo-600">
-                <LayersIcon />
-                <span className="text-sm">拖拽体验物理效果</span>
-              </div>
-              <Tag theme="primary" variant="light">可拖拽</Tag>
-            </div>
-            <div className="relative h-64 bg-gradient-to-br from-indigo-400 to-violet-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                enablePhysics={true}
-                physics={physicsPresets.water}
-                width={200}
-                height={120}
-                position="fixed"
-                initialPosition={{ x: 100, y: 100 }}
-                bounceOnConstraints={true}
-                draggable={true}
-              >
-                拖拽我试试
-              </LiquidGlass>
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-white text-sm bg-black/20 px-3 py-2 rounded-lg backdrop-blur-sm">
-                  🎯 拖拽上方的玻璃框体验物理效果
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* 物理特性说明 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card title="物理特性说明" bordered>
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">弹性系数 (Elasticity)</h4>
-                  <p className="text-sm text-gray-600">控制物体的弹性回弹力度，值越大回弹越强</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">阻尼系数 (Dampening)</h4>
-                  <p className="text-sm text-gray-600">控制运动的衰减，值越大运动停止越快</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">波纹强度 (Ripple Intensity)</h4>
-                  <p className="text-sm text-gray-600">控制表面波纹的强度和传播距离</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">粘性系数 (Viscosity)</h4>
-                  <p className="text-sm text-gray-600">控制液体的粘稠度，影响流动和响应速度</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">表面张力 (Surface Tension)</h4>
-                  <p className="text-sm text-gray-600">控制液体表面的内聚力，影响形状保持</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        <Card title="交互技巧" bordered>
-          <div className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">拖拽体验</h4>
-                  <p className="text-sm text-gray-600">拖拽固定定位的玻璃框，感受不同物理效果</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">鼠标悬停</h4>
-                  <p className="text-sm text-gray-600">在玻璃表面移动鼠标，观察实时形变效果</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-teal-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">点击波纹</h4>
-                  <p className="text-sm text-gray-600">点击玻璃表面会产生波纹扩散效果</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
-                <div>
-                  <h4 className="font-medium text-gray-900">速度形变</h4>
-                  <p className="text-sm text-gray-600">快速拖拽会产生更明显的液体形变效果</p>
-                </div>
-              </div>
-            </div>
-            <div className="pt-4">
-              <Space>
-                <Button theme="primary" size="small">
-                  查看代码示例
-                </Button>
-                <Button theme="default" variant="text" size="small">
-                  API 文档
-                </Button>
-              </Space>
             </div>
           </div>
         </Card>

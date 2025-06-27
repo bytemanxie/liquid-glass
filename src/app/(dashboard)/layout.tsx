@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Layout, Button, Drawer } from 'tdesign-react';
 import { ViewModuleIcon, LayersIcon, ControlPlatformIcon, MenuIcon } from 'tdesign-icons-react';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 
 const { Header, Content } = Layout;
 
@@ -43,25 +44,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }
   ];
 
-  const handleMenuClick = (value: string) => {
-    router.push(value);
+  const handleLinkClick = () => {
     setDrawerVisible(false);
   };
+
 
   const DesktopNavigation = () => (
     <nav className="hidden md:flex items-center space-x-6">
       {menuItems.map((item) => (
-        <button
+        <Link
           key={item.value}
+          href={item.value}
           className={`
             flex items-center space-x-2 px-3 py-2 rounded-lg 
-            transition-colors duration-200
+            transition-colors duration-200 no-underline
             ${pathname === item.value 
               ? 'text-blue-600 dark:text-blue-400 font-semibold' 
               : 'text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
             }
           `}
-          onClick={() => handleMenuClick(item.value)}
+          onClick={handleLinkClick}
         >
           <span className="text-lg">
             {item.icon}
@@ -69,7 +71,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <span className="font-medium">
             {item.label}
           </span>
-        </button>
+        </Link>
       ))}
     </nav>
   );
@@ -77,16 +79,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const MobileMenuContent = () => (
     <div className="space-y-2 p-4">
       {menuItems.map((item) => (
-        <div
+        <Link
           key={item.value}
+          href={item.value}
           className={`
-            cursor-pointer rounded-lg p-4 transition-colors duration-200
+            block rounded-lg p-4 transition-colors duration-200 no-underline
             ${pathname === item.value 
               ? 'bg-blue-50 dark:bg-blue-900/20 border-l-3 border-blue-500' 
               : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'
             }
           `}
-          onClick={() => handleMenuClick(item.value)}
+          onClick={handleLinkClick}
         >
           <div className="flex items-center space-x-3">
             <div className={`
@@ -113,7 +116,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
           </div>
-        </div>
+        </Link>
       ))}
     </div>
   );
