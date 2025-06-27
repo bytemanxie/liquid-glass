@@ -18,7 +18,7 @@ export default function PlaygroundPage() {
     <div className='p-0' style={{ backgroundColor: '#1e293b' }}>
       <div className='max-w-7xl mx-auto'>
         {/* 预览区域 */}
-        <div className='p-4 mb-4'>
+        <div className='mb-4'>
           <Card
             title={<Text style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '16px' }}>实时预览</Text>}
             bordered

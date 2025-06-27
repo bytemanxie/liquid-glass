@@ -12,6 +12,21 @@ const moveBackground = keyframes`
   100% { background-position: 500px 500px; }
 `;
 
+const glassPluse = keyframes`
+  0% { 
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 
+                0 0 40px rgba(59, 130, 246, 0.4),
+                inset 0 0 15px rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.8);
+  }
+  100% { 
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 
+                0 0 60px rgba(59, 130, 246, 0.6),
+                inset 0 0 20px rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 1);
+  }
+`;
+
 const width=90;
 const height=50;
 
@@ -246,6 +261,18 @@ const TabBarPage: React.FC = () => {
           targetPosition={glassPosition}
           isDragging={isDragging}
           delayStrength={0.3}
+          style={{
+            // 增强边界感的样式
+            border: isDragging 
+              ? '2px solid rgba(255, 255, 255, 0.8)' 
+              : '1px solid rgba(255, 255, 255, 0.4)',
+            boxShadow: isDragging
+              ? `0 0 20px rgba(255, 255, 255, 0.6), 
+                 0 0 40px rgba(59, 130, 246, 0.4),
+                 inset 0 0 15px rgba(255, 255, 255, 0.1)`
+              : `0 0 10px rgba(255, 255, 255, 0.3),
+                 inset 0 0 8px rgba(255, 255, 255, 0.05)`,
+          }}
         />
       )}
 

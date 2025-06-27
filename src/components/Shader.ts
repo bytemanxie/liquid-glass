@@ -115,6 +115,10 @@ export class Shader {
       backdrop-filter: url(#${this.id}_filter) blur(0.25px) contrast(1.2) brightness(1.05) saturate(1.1);
       z-index: 9999;
       pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
     `;
 
     // 设置初始位置
@@ -200,21 +204,22 @@ export class Shader {
     let isDragging = false;
     let startX: number, startY: number, initialX: number, initialY: number;
 
-    this.container.addEventListener('mousedown', e => {
+    // 统一的开始拖动处理函数
+    const startDrag = (clientX: number, clientY: number) => {
       isDragging = true;
       this.container.style.cursor = 'grabbing';
-      startX = e.clientX;
-      startY = e.clientY;
+      startX = clientX;
+      startY = clientY;
       const rect = this.container.getBoundingClientRect();
       initialX = rect.left;
       initialY = rect.top;
-      e.preventDefault();
-    });
+    };
 
-    document.addEventListener('mousemove', e => {
+    // 统一的移动处理函数
+    const handleMove = (clientX: number, clientY: number) => {
       if (isDragging) {
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
+        const deltaX = clientX - startX;
+        const deltaY = clientY - startY;
 
         const newX = initialX + deltaX;
         const newY = initialY + deltaY;
@@ -226,22 +231,65 @@ export class Shader {
         this.container.style.transform = 'none';
       }
 
-      // 更新鼠标位置
+      // 更新鼠标/触摸位置
       const rect = this.container.getBoundingClientRect();
-      this.mouse.x = (e.clientX - rect.left) / rect.width;
-      this.mouse.y = (e.clientY - rect.top) / rect.height;
+      this.mouse.x = (clientX - rect.left) / rect.width;
+      this.mouse.y = (clientY - rect.top) / rect.height;
 
       // 关键：只有在鼠标被使用时才更新shader
       if (this.mouseUsed) {
         this.updateShader();
       }
+    };
+
+    // 统一的结束拖动处理函数
+    const endDrag = () => {
+      isDragging = false;
+      this.container.style.cursor = 'grab';
+    };
+
+    // 鼠标事件
+    this.container.addEventListener('mousedown', e => {
+      startDrag(e.clientX, e.clientY);
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+      handleMove(e.clientX, e.clientY);
     });
 
     document.addEventListener('mouseup', () => {
-      isDragging = false;
-      this.container.style.cursor = 'grab';
+      endDrag();
     });
 
+    // 触摸事件 - 移动端支持
+    this.container.addEventListener('touchstart', e => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        startDrag(touch.clientX, touch.clientY);
+        e.preventDefault(); // 防止页面滚动
+      }
+    }, { passive: false });
+
+    document.addEventListener('touchmove', e => {
+      if (e.touches.length === 1 && isDragging) {
+        const touch = e.touches[0];
+        handleMove(touch.clientX, touch.clientY);
+        e.preventDefault(); // 防止页面滚动
+      }
+    }, { passive: false });
+
+    document.addEventListener('touchend', e => {
+      if (e.touches.length === 0) {
+        endDrag();
+      }
+    });
+
+    document.addEventListener('touchcancel', () => {
+      endDrag();
+    });
+
+    // 窗口大小调整
     window.addEventListener('resize', () => {
       const rect = this.container.getBoundingClientRect();
       const constrained = this.constrainPosition(rect.left, rect.top);

@@ -16,24 +16,14 @@ export default function EnhancedPage() {
   const [selectedFragment, setSelectedFragment] =
     useState<keyof typeof presetFragments>('default');
   const [glassSize, setGlassSize] = useState(300);
-
+  const [isDraggable, setIsDraggable] = useState(true);
   const currentFragment = presetFragments[selectedFragment];
 
   return (
     <div className='p-0' style={{ backgroundColor: '#1e293b' }}>
       <div className='max-w-6xl mx-auto'>
-        {/* 页面标题 */}
-        <div className='text-center mb-4 p-4'>
-          <Title level="h1" style={{ color: '#f1f5f9', marginBottom: '8px', fontSize: '28px' }}>
-            液态玻璃效果展示
-          </Title>
-          <Paragraph style={{ color: '#94a3b8', fontSize: '16px', margin: '0 auto', maxWidth: '600px' }}>
-            探索不同的液态变形效果，体验流畅的视觉体验
-          </Paragraph>
-        </div>
-
         {/* 效果展示区域 */}
-        <div className='px-4 mb-4'>
+        <div className='px-4 my-4'>
           <Card
             title={<Text style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '16px' }}>实时预览</Text>}
             bordered
@@ -57,7 +47,9 @@ export default function EnhancedPage() {
                 height={glassSize * 0.6}
                 fragment={currentFragment}
                 position={{ x: 50, y: 50 }}
-              />
+              >
+                {isDraggable ? '🖱️ 拖拽我' : '🔒 固定位置'}
+              </LiquidGlass>
 
               {/* 信息显示 */}
               <div className='absolute bottom-4 right-4' style={{

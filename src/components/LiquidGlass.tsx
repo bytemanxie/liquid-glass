@@ -71,7 +71,6 @@ export default function LiquidGlass({
   position = { x: 100, y: 100 },
   draggable = true,
 }: LiquidGlassProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const shaderRef = useRef<Shader | null>(null);
 
   const createShader = useCallback(() => {
@@ -96,7 +95,41 @@ export default function LiquidGlass({
 
     shader.appendTo(document.body);
     shaderRef.current = shader;
-  }, [width, height, fragment, borderRadius, position, draggable]);
+
+    // 如果有children，将其渲染到shader容器中
+    if (children && shader.container) {
+      const contentWrapper = document.createElement('div');
+      contentWrapper.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        text-align: center;
+        pointer-events: none;
+        z-index: 1;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        user-select: none;
+        white-space: nowrap;
+      `;
+      
+      // 创建React内容的挂载点
+      const reactRoot = document.createElement('div');
+      contentWrapper.appendChild(reactRoot);
+      shader.container.appendChild(contentWrapper);
+
+      // 使用React的createRoot API渲染children
+      import('react-dom/client').then(({ createRoot }) => {
+        const root = createRoot(reactRoot);
+        root.render(children);
+        
+        // 保存root以便清理
+        (shader as any).__reactRoot = root;
+      });
+    }
+  }, [width, height, fragment, borderRadius, position, draggable, children]);
 
   useEffect(() => {
     createShader();
@@ -109,42 +142,35 @@ export default function LiquidGlass({
     };
   }, [createShader]);
 
-  return (
-    <div
-      ref={containerRef}
-      className={className}
-      style={{
-        position: 'fixed',
-        left: position.x,
-        top: position.y,
-        width: width,
-        height: height,
-        zIndex: 10000,
-        pointerEvents: 'none',
-        display: children ? 'block' : 'none',
-        ...style,
-      }}
-    >
-      {children && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            color: 'white',
-            fontSize: '16px',
-            fontWeight: 600,
-            textAlign: 'center',
-            pointerEvents: 'none',
-            zIndex: 10001,
-          }}
-        >
-          {children}
-        </div>
-      )}
-    </div>
-  );
+  // 如果没有提供children，创建一个临时的Shader来显示默认文本
+  useEffect(() => {
+    if (!children && shaderRef.current?.container) {
+      const existingContent = shaderRef.current.container.querySelector('.default-content');
+      if (!existingContent) {
+        const defaultContentWrapper = document.createElement('div');
+        defaultContentWrapper.className = 'default-content';
+        defaultContentWrapper.style.cssText = `
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 16px;
+          font-weight: 600;
+          text-align: center;
+          pointer-events: none;
+          z-index: 1;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+          user-select: none;
+          white-space: nowrap;
+        `;
+        shaderRef.current.container.appendChild(defaultContentWrapper);
+      }
+    }
+  }, [draggable, children]);
+
+  // 这个组件现在只是一个控制器，不渲染任何可见内容
+  return null;
 }
 
 // 预设fragments
