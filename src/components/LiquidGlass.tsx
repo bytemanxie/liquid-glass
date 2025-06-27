@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
-import { 
-  Shader, 
-  type UV, 
-  type Mouse, 
-  type TextureResult, 
+import {
+  Shader,
+  type UV,
+  type Mouse,
+  type TextureResult,
   type FragmentFunction,
   smoothStep,
   roundedRectSDF,
   texture,
-  generateId
+  generateId,
 } from './Shader';
 
 interface LiquidGlassProps {
@@ -24,6 +24,34 @@ interface LiquidGlassProps {
   position?: { x: number; y: number };
   draggable?: boolean;
 }
+
+// 创建适应宽高比的fragment函数
+const createAdaptiveFragment = (width: number, height: number): FragmentFunction => {
+  return (uv, mouse) => {
+    const ix = uv.x - 0.5;
+    const iy = uv.y - 0.5;
+    
+    // 计算宽高比，确保圆形效果
+    const aspectRatio = width / height;
+    const radius = Math.min(width, height) * 0.0025; // 自适应圆角
+    
+    let halfWidth, halfHeight;
+    if (aspectRatio > 1) {
+      // 宽度大于高度
+      halfWidth = 0.4;
+      halfHeight = 0.4 / aspectRatio;
+    } else {
+      // 高度大于宽度
+      halfWidth = 0.4 * aspectRatio;
+      halfHeight = 0.4;
+    }
+    
+    const distanceToEdge = roundedRectSDF(ix, iy, halfWidth, halfHeight, radius);
+    const displacement = smoothStep(0.8, 0, distanceToEdge - 0.15);
+    const scaled = smoothStep(0, 1, displacement);
+    return texture(ix * scaled + 0.5, iy * scaled + 0.5);
+  };
+};
 
 // 默认fragment - 完全按照glass.js的方式
 const defaultFragment: FragmentFunction = (uv, mouse) => {
@@ -44,7 +72,7 @@ export default function LiquidGlass({
   fragment = defaultFragment,
   borderRadius,
   position = { x: 100, y: 100 },
-  draggable = true
+  draggable = true,
 }: LiquidGlassProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const shaderRef = useRef<Shader | null>(null);
@@ -55,11 +83,16 @@ export default function LiquidGlass({
       shaderRef.current.destroy();
     }
 
+    // 如果borderRadius为0，使用自适应fragment；否则使用传入的fragment
+    const effectiveFragment = borderRadius === 0 
+      ? createAdaptiveFragment(width, height)
+      : fragment;
+
     // 创建新的shader - 完全按照glass.js的方式
     const shader = new Shader({
       width,
       height,
-      fragment,
+      fragment: effectiveFragment,
       borderRadius,
       draggable,
       initialPosition: position,
@@ -94,7 +127,7 @@ export default function LiquidGlass({
         zIndex: 10000,
         pointerEvents: 'none',
         display: children ? 'block' : 'none',
-        ...style
+        ...style,
       }}
     >
       {children && (
@@ -122,7 +155,7 @@ export default function LiquidGlass({
 // 预设fragments
 export const presetFragments = {
   default: defaultFragment,
-  
+
   strong: (uv: UV, mouse: Mouse) => {
     const ix = uv.x - 0.5;
     const iy = uv.y - 0.5;
@@ -131,7 +164,7 @@ export const presetFragments = {
     const scaled = smoothStep(0, 1, displacement);
     return texture(ix * scaled + 0.5, iy * scaled + 0.5);
   },
-  
+
   subtle: (uv: UV, mouse: Mouse) => {
     const ix = uv.x - 0.5;
     const iy = uv.y - 0.5;
@@ -141,7 +174,8 @@ export const presetFragments = {
     return texture(ix * scaled + 0.5, iy * scaled + 0.5);
   },
 
-  interactive: defaultFragment
+  interactive: defaultFragment,
 };
 
-export type { FragmentFunction, UV, Mouse, LiquidGlassProps }; 
+export { createAdaptiveFragment };
+export type { FragmentFunction, UV, Mouse, LiquidGlassProps };

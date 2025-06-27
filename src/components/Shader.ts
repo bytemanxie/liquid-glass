@@ -27,10 +27,20 @@ function length(x: number, y: number): number {
   return Math.sqrt(x * x + y * y);
 }
 
-function roundedRectSDF(x: number, y: number, width: number, height: number, radius: number): number {
+function roundedRectSDF(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+): number {
   const qx = Math.abs(x) - width + radius;
   const qy = Math.abs(y) - height + radius;
-  return Math.min(Math.max(qx, qy), 0) + length(Math.max(qx, 0), Math.max(qy, 0)) - radius;
+  return (
+    Math.min(Math.max(qx, qy), 0) +
+    length(Math.max(qx, 0), Math.max(qy, 0)) -
+    radius
+  );
 }
 
 function texture(x: number, y: number): TextureResult {
@@ -49,10 +59,10 @@ export class Shader {
   canvasDPI: number = 1;
   id: string;
   offset: number = 10;
-  
+
   mouse: Mouse = { x: 0, y: 0 };
   mouseUsed: boolean = false;
-  
+
   container!: HTMLDivElement;
   svg!: SVGSVGElement;
   canvas!: HTMLCanvasElement;
@@ -74,13 +84,13 @@ export class Shader {
     this.height = options.height;
     this.fragment = options.fragment;
     this.id = generateId();
-    
+
     this.createElement(options);
-    
+
     if (options.draggable !== false) {
       this.setupEventListeners();
     }
-    
+
     this.updateShader();
   }
 
@@ -129,7 +139,10 @@ export class Shader {
     `;
 
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    const filter = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'filter'
+    );
     filter.setAttribute('id', `${this.id}_filter`);
     filter.setAttribute('filterUnits', 'userSpaceOnUse');
     filter.setAttribute('colorInterpolationFilters', 'sRGB');
@@ -138,12 +151,18 @@ export class Shader {
     filter.setAttribute('width', this.width.toString());
     filter.setAttribute('height', this.height.toString());
 
-    this.feImage = document.createElementNS('http://www.w3.org/2000/svg', 'feImage');
+    this.feImage = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'feImage'
+    );
     this.feImage.setAttribute('id', `${this.id}_map`);
     this.feImage.setAttribute('width', this.width.toString());
     this.feImage.setAttribute('height', this.height.toString());
 
-    this.feDisplacementMap = document.createElementNS('http://www.w3.org/2000/svg', 'feDisplacementMap');
+    this.feDisplacementMap = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'feDisplacementMap'
+    );
     this.feDisplacementMap.setAttribute('in', 'SourceGraphic');
     this.feDisplacementMap.setAttribute('in2', `${this.id}_map`);
     this.feDisplacementMap.setAttribute('xChannelSelector', 'R');
@@ -166,15 +185,15 @@ export class Shader {
   constrainPosition(x: number, y: number): { x: number; y: number } {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    
+
     const minX = this.offset;
     const maxX = viewportWidth - this.width - this.offset;
     const minY = this.offset;
     const maxY = viewportHeight - this.height - this.offset;
-    
+
     const constrainedX = Math.max(minX, Math.min(maxX, x));
     const constrainedY = Math.max(minY, Math.min(maxY, y));
-    
+
     return { x: constrainedX, y: constrainedY };
   }
 
@@ -182,7 +201,7 @@ export class Shader {
     let isDragging = false;
     let startX: number, startY: number, initialX: number, initialY: number;
 
-    this.container.addEventListener('mousedown', (e) => {
+    this.container.addEventListener('mousedown', e => {
       isDragging = true;
       this.container.style.cursor = 'grabbing';
       startX = e.clientX;
@@ -193,16 +212,16 @@ export class Shader {
       e.preventDefault();
     });
 
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener('mousemove', e => {
       if (isDragging) {
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
-        
+
         const newX = initialX + deltaX;
         const newY = initialY + deltaY;
-        
+
         const constrained = this.constrainPosition(newX, newY);
-        
+
         this.container.style.left = constrained.x + 'px';
         this.container.style.top = constrained.y + 'px';
         this.container.style.transform = 'none';
@@ -212,7 +231,7 @@ export class Shader {
       const rect = this.container.getBoundingClientRect();
       this.mouse.x = (e.clientX - rect.left) / rect.width;
       this.mouse.y = (e.clientY - rect.top) / rect.height;
-      
+
       // 关键：只有在鼠标被使用时才更新shader
       if (this.mouseUsed) {
         this.updateShader();
@@ -227,7 +246,7 @@ export class Shader {
     window.addEventListener('resize', () => {
       const rect = this.container.getBoundingClientRect();
       const constrained = this.constrainPosition(rect.left, rect.top);
-      
+
       if (rect.left !== constrained.x || rect.top !== constrained.y) {
         this.container.style.left = constrained.x + 'px';
         this.container.style.top = constrained.y + 'px';
@@ -247,7 +266,7 @@ export class Shader {
       get: (target, prop) => {
         this.mouseUsed = true;
         return target[prop as keyof Mouse];
-      }
+      },
     });
 
     this.mouseUsed = false;
@@ -262,10 +281,7 @@ export class Shader {
     for (let i = 0; i < data.length; i += 4) {
       const x = (i / 4) % w;
       const y = Math.floor(i / 4 / w);
-      const pos = this.fragment(
-        { x: x / w, y: y / h },
-        mouseProxy
-      );
+      const pos = this.fragment({ x: x / w, y: y / h }, mouseProxy);
       const dx = pos.x * w - x;
       const dy = pos.y * h - y;
       maxScale = Math.max(maxScale, Math.abs(dx), Math.abs(dy));
@@ -285,8 +301,15 @@ export class Shader {
     }
 
     this.context.putImageData(new ImageData(data, w, h), 0, 0);
-    this.feImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', this.canvas.toDataURL());
-    this.feDisplacementMap.setAttribute('scale', (maxScale / this.canvasDPI).toString());
+    this.feImage.setAttributeNS(
+      'http://www.w3.org/1999/xlink',
+      'href',
+      this.canvas.toDataURL()
+    );
+    this.feDisplacementMap.setAttribute(
+      'scale',
+      (maxScale / this.canvasDPI).toString()
+    );
   }
 
   destroy() {
@@ -301,4 +324,4 @@ export class Shader {
 
 // 导出类型和工具函数
 export type { UV, Mouse, TextureResult, FragmentFunction };
-export { smoothStep, length, roundedRectSDF, texture, generateId }; 
+export { smoothStep, length, roundedRectSDF, texture, generateId };

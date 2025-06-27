@@ -12,17 +12,90 @@ const moveBackground = keyframes`
   100% { background-position: 500px 500px; }
 `;
 
+// 液态玻璃动画 - 开始拖拽时的变形
+const glassSquish = keyframes`
+  0% { 
+    transform: scale(1, 1) rotate(0deg);
+    opacity: 0;
+  }
+  30% { 
+    transform: scale(2.5, 0.3) rotate(2deg);
+    opacity: 0.9;
+  }
+  100% { 
+    transform: scale(1.8, 0.5) rotate(0deg);
+    opacity: 0.95;
+  }
+`;
+
+// 液态玻璃动画 - 拖拽过程中的波动
+const glassRipple = keyframes`
+  0% { 
+    transform: scale(1.8, 0.5) rotate(0deg);
+  }
+  20% { 
+    transform: scale(2.2, 0.3) rotate(2deg);
+  }
+  40% { 
+    transform: scale(1.4, 0.7) rotate(-2deg);
+  }
+  60% { 
+    transform: scale(2.0, 0.4) rotate(1deg);
+  }
+  80% { 
+    transform: scale(1.6, 0.6) rotate(-1deg);
+  }
+  100% { 
+    transform: scale(1.8, 0.5) rotate(0deg);
+  }
+`;
+
+// 液态玻璃动画 - 结束时的弹性恢复
+const glassRestore = keyframes`
+  0% { 
+    transform: scale(1.8, 0.5) rotate(0deg);
+  }
+  30% { 
+    transform: scale(0.8, 1.4) rotate(-2deg);
+  }
+  60% { 
+    transform: scale(1.3, 0.8) rotate(1deg);
+  }
+  80% { 
+    transform: scale(0.95, 1.1) rotate(-0.5deg);
+  }
+  100% { 
+    transform: scale(1, 1) rotate(0deg);
+  }
+`;
+
+// 液态玻璃动画 - 消失时的收缩
+const glassFadeOut = keyframes`
+  0% { 
+    transform: scale(1, 1) rotate(0deg);
+    opacity: 0.95;
+  }
+  50% { 
+    transform: scale(0.5, 0.5) rotate(5deg);
+    opacity: 0.5;
+  }
+  100% { 
+    transform: scale(0, 0) rotate(10deg);
+    opacity: 0;
+  }
+`;
+
 // 主容器
 const AnimatedBackground = styled.div`
-  min-height: 100vh;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   margin: 0;
-  height: 100vh;
-  background: url("https://www.publicdomainpictures.net/pictures/610000/velka/seamless-floral-wallpaper-art-1715193626Gct.jpg") center center;
+  height: 85vh;
+  background: url('https://www.publicdomainpictures.net/pictures/610000/velka/seamless-floral-wallpaper-art-1715193626Gct.jpg')
+    center center;
   background-size: 500px;
   background-repeat: repeat;
   font-family: sans-serif;
@@ -58,7 +131,10 @@ const Subtitle = styled.p`
 `;
 
 // 状态指示器
-const GlassIndicator = styled.div<{ $isDragging: boolean; $isVisible: boolean }>`
+const GlassIndicator = styled.div<{
+  $isDragging: boolean;
+  $isVisible: boolean;
+}>`
   margin-top: 0.5rem;
   font-size: 0.875rem;
   transition: all 0.2s ease;
@@ -89,7 +165,8 @@ const SliderContainer = styled.div`
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: transform 0.1s ease;
 
-    &:hover, &:focus {
+    &:hover,
+    &:focus {
       transform: scale(1.1);
       border-color: #3b82f6;
       box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.12);
@@ -141,12 +218,37 @@ const ScaleMarks = styled.div`
   padding: 0 1rem;
 `;
 
-// 性能提示
-const PerformanceTip = styled.div`
-  margin-top: 1rem;
-  text-align: center;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.5);
+// 动画化的玻璃容器
+const AnimatedGlass = styled.div<{ $animationState: string }>`
+  position: fixed;
+  pointer-events: none;
+  z-index: 5;
+  transform-origin: center center;
+  opacity: 1;
+  will-change: transform, opacity;
+
+  animation: ${props => {
+    switch (props.$animationState) {
+      case 'squish':
+        return css`
+          ${glassSquish} 0.5s ease-out forwards
+        `;
+      case 'ripple':
+        return css`
+          ${glassRipple} 0.6s ease-in-out infinite
+        `;
+      case 'restore':
+        return css`
+          ${glassRestore} 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards
+        `;
+      case 'fadeout':
+        return css`
+          ${glassFadeOut} 0.4s ease-in forwards
+        `;
+      default:
+        return 'none';
+    }
+  }};
 `;
 
 const TabBarPage: React.FC = () => {
@@ -156,83 +258,115 @@ const TabBarPage: React.FC = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const glassTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [glassPosition, setGlassPosition] = useState({ x: 100, y: 100 });
-  const [glassTransform, setGlassTransform] = useState('scale(1, 1)');
+  const [animationState, setAnimationState] = useState<
+    'squish' | 'ripple' | 'restore' | 'fadeout' | 'none'
+  >('none');
 
   // 计算滑块手柄的精确位置
-  const calculateHandlePosition = useCallback((value?: number) => {
-    if (!sliderRef.current) return { x: 100, y: 100 };
-    
-    const sliderElement = sliderRef.current.querySelector('.ant-slider');
-    if (!sliderElement) return { x: 100, y: 100 };
-    
-    const rect = sliderElement.getBoundingClientRect();
-    const currentValue = value !== undefined ? value : sliderValue;
-    const progress = currentValue / 100;
-    
-    // 计算手柄位置（考虑轨道的padding）
-    const trackPadding = 10; // Ant Design滑块的内边距
-    const availableWidth = rect.width - (trackPadding * 2);
-    const handleX = rect.left + trackPadding + (availableWidth * progress);
-    const handleY = rect.top + rect.height / 2;
-    
-    // Glass居中在手柄上
-    const x = handleX + window.scrollX - 40; // glass宽度80的一半
-    const y = handleY + window.scrollY - 30; // glass高度60的一半
-    
-    return { 
-      x: Math.max(10, Math.min(window.innerWidth - 90, x)), 
-      y: Math.max(10, y) 
-    };
-  }, [sliderValue]);
+  const calculateHandlePosition = useCallback(
+    (value?: number) => {
+      if (!sliderRef.current) {
+        return { x: 100, y: 100 };
+      }
+
+      // 直接查找手柄元素
+      const handleElement =
+        sliderRef.current.querySelector('.ant-slider-handle');
+      if (handleElement) {
+        const handleRect = handleElement.getBoundingClientRect();
+        const x = handleRect.left + handleRect.width / 2 - 50; // glass宽度100的一半
+        const y = handleRect.top + handleRect.height / 2 - 40; // glass高度80的一半
+
+        return {
+          x: Math.max(10, Math.min(window.innerWidth - 110, x)),
+          y: Math.max(10, y),
+        };
+      }
+
+      // 备用方法：基于轨道计算
+      const sliderElement = sliderRef.current.querySelector('.ant-slider');
+      if (!sliderElement) {
+        return { x: 100, y: 100 };
+      }
+
+      const rect = sliderElement.getBoundingClientRect();
+      const currentValue = value !== undefined ? value : sliderValue;
+      const progress = currentValue / 100;
+
+      // 计算手柄位置
+      const handleX = rect.left + rect.width * progress;
+      const handleY = rect.top + rect.height / 2;
+
+      // Glass居中在手柄上
+      const x = handleX - 50; // glass宽度100的一半
+      const y = handleY - 40; // glass高度80的一半
+
+      return {
+        x: Math.max(10, Math.min(window.innerWidth - 110, x)),
+        y: Math.max(10, y),
+      };
+    },
+    [sliderValue]
+  );
 
   // 滑块值变化处理
-  const handleSliderChange = useCallback((value: number | number[]) => {
-    const numValue = Array.isArray(value) ? value[0] : value;
-    setSliderValue(numValue);
-    
-    if (!isDragging) {
-      // 开始拖拽
-      setIsDragging(true);
-      setIsGlassVisible(true);
-      setGlassTransform('scale(2, 0.4) rotate(0deg)'); // 更扁平的开始状态
-      
-      if (glassTimeoutRef.current) {
-        clearTimeout(glassTimeoutRef.current);
+  const handleSliderChange = useCallback(
+    (value: number | number[]) => {
+      const numValue = Array.isArray(value) ? value[0] : value;
+      setSliderValue(numValue);
+
+      if (!isDragging) {
+        // 开始拖拽 - 启动挤压动画
+        setIsDragging(true);
+        setIsGlassVisible(true);
+        setAnimationState('squish');
+
+        // 延迟设置正确位置，确保DOM已渲染
+        setTimeout(() => {
+          const initialPosition = calculateHandlePosition(numValue);
+          setGlassPosition(initialPosition);
+        }, 10);
+
+        if (glassTimeoutRef.current) {
+          clearTimeout(glassTimeoutRef.current);
+        }
+
+        // 挤压动画结束后切换到波动动画
+        setTimeout(() => {
+          setAnimationState('ripple');
+        }, 400);
       }
-    }
-    
-    // 实时更新位置（拖拽过程中）
-    if (isDragging || isGlassVisible) {
+
+      // 实时更新位置 - 始终更新位置
       const newPosition = calculateHandlePosition(numValue);
       setGlassPosition(newPosition);
-      // 拖拽中保持动态变形
-      const rotation = (numValue - 50) * 0.2; // 根据位置轻微旋转
-      setGlassTransform(`scale(1.8, 0.5) rotate(${rotation}deg)`);
-    }
-  }, [isDragging, isGlassVisible, calculateHandlePosition]);
+    },
+    [isDragging, isGlassVisible, calculateHandlePosition]
+  );
 
   // 滑块拖拽结束
   const handleSliderAfterChange = useCallback((value: number | number[]) => {
     setIsDragging(false);
-    
-    // 结束时弹性恢复形状
-    setGlassTransform('scale(1.2, 1.2) rotate(0deg)'); // 先放大
-    
-    // 短暂显示然后隐藏
+
+    // 启动恢复动画
+    setAnimationState('restore');
+
+    // 恢复动画结束后启动消失动画
     setTimeout(() => {
-      setGlassTransform('scale(1, 1) rotate(0deg)'); // 然后恢复正常
-    }, 100);
-    
+      setAnimationState('fadeout');
+    }, 600);
+
+    // 完全隐藏
     glassTimeoutRef.current = setTimeout(() => {
       setIsGlassVisible(false);
-      setGlassTransform('scale(1, 1) rotate(0deg)'); // 重置变形
-    }, 400); // 增加显示时间
+      setAnimationState('none');
+    }, 900);
   }, []);
 
   // 监听窗口大小变化
   useEffect(() => {
     if (!isGlassVisible) return;
-    
+
     const updateGlassPosition = () => {
       const newPosition = calculateHandlePosition();
       setGlassPosition(newPosition);
@@ -253,24 +387,29 @@ const TabBarPage: React.FC = () => {
 
   return (
     <AnimatedBackground>
-      {/* 液态玻璃 - 只包裹手柄圆点，带动态变形 */}
+      {/* 液态玻璃 - 只包裹手柄圆点，带动态keyframe动画 */}
       {isGlassVisible && (
         <LiquidGlass
-          width={80}
-          height={60}
-          fragment={presetFragments.subtle}
+          width={100}
+          height={80}
+          fragment={presetFragments.default}
           position={glassPosition}
           draggable={false}
           style={{
-            opacity: 0.9,
-            willChange: 'transform, opacity',
-            zIndex: 5, // 在滑块上方但不阻挡交互
-            pointerEvents: 'none',
-            transform: glassTransform,
-            transition: isDragging 
-              ? 'transform 0.05s ease-out, opacity 0.1s ease' 
-              : 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease',
             transformOrigin: 'center center',
+            willChange: 'transform, opacity',
+            pointerEvents: 'none',
+            zIndex: 5,
+            animation:
+              animationState === 'squish'
+                ? `squish 0.5s ease-out forwards`
+                : animationState === 'ripple'
+                  ? `ripple 0.6s ease-in-out infinite`
+                  : animationState === 'restore'
+                    ? `restore 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards`
+                    : animationState === 'fadeout'
+                      ? `fadeout 0.4s ease-in forwards`
+                      : 'none',
           }}
         />
       )}
@@ -282,20 +421,37 @@ const TabBarPage: React.FC = () => {
           <Subtitle>拖拽滑块查看动态玻璃效果</Subtitle>
           {/* 状态指示器 */}
           <GlassIndicator $isDragging={isDragging} $isVisible={isGlassVisible}>
-            玻璃状态: {isDragging ? '🌊 流动变形中' : isGlassVisible ? '✨ 弹性恢复中' : '💤 待机'}
+            玻璃状态:{' '}
+            {animationState === 'squish'
+              ? '🌊 液态挤压中'
+              : animationState === 'ripple'
+                ? '〰️ 波动流动中'
+                : animationState === 'restore'
+                  ? '✨ 弹性恢复中'
+                  : animationState === 'fadeout'
+                    ? '💨 收缩消失中'
+                    : '💤 待机'}
           </GlassIndicator>
         </TitleSection>
 
         {/* 滑块容器 */}
         <SliderContainer ref={sliderRef}>
           <SliderInfo>
-            <SliderTitle>动态液态玻璃</SliderTitle>
+            <SliderTitle>液态玻璃动画</SliderTitle>
             <SliderValue>{sliderValue}</SliderValue>
             <SliderStatus>
-              {isDragging ? '玻璃正在流动变形...' : '拖拽查看液态效果'}
+              {animationState === 'squish'
+                ? '液态玻璃正在挤压变形...'
+                : animationState === 'ripple'
+                  ? '玻璃随拖拽波动流动...'
+                  : animationState === 'restore'
+                    ? '玻璃弹性恢复原形...'
+                    : animationState === 'fadeout'
+                      ? '玻璃收缩消失中...'
+                      : '拖拽查看液态玻璃动画'}
             </SliderStatus>
           </SliderInfo>
-          
+
           {/* 滑块组件 */}
           <SliderWrapper>
             <Slider
@@ -305,7 +461,7 @@ const TabBarPage: React.FC = () => {
               min={0}
               max={100}
               step={1}
-              className="slider-optimized"
+              className='slider-optimized'
             />
           </SliderWrapper>
 
@@ -323,4 +479,4 @@ const TabBarPage: React.FC = () => {
   );
 };
 
-export default TabBarPage; 
+export default TabBarPage;

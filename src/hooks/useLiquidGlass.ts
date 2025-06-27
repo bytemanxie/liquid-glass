@@ -19,14 +19,15 @@ export const animationPresets = {
   wave: (uv: UV, mouse: Mouse, time: number = 0) => {
     const ix = uv.x - 0.5;
     const iy = uv.y - 0.5;
-    
+
     // 添加时间基础的波浪动画
     const wave = Math.sin(time * 0.003 + ix * 10) * 0.02;
-    
+
     const distanceToEdge = Math.sqrt(ix * ix + iy * iy) - 0.3;
-    const displacement = Math.max(0, Math.min(1, (0.8 - distanceToEdge) / 0.8)) + wave;
+    const displacement =
+      Math.max(0, Math.min(1, (0.8 - distanceToEdge) / 0.8)) + wave;
     const scaled = displacement * 0.5;
-    
+
     return { type: 't' as const, x: ix * scaled + 0.5, y: iy * scaled + 0.5 };
   },
 
@@ -34,16 +35,17 @@ export const animationPresets = {
   pulse: (uv: UV, mouse: Mouse, time: number = 0) => {
     const ix = uv.x - 0.5;
     const iy = uv.y - 0.5;
-    
+
     // 脉冲动画
     const pulse = (Math.sin(time * 0.005) + 1) * 0.5;
     const distanceToCenter = Math.sqrt(ix * ix + iy * iy);
-    const displacement = Math.max(0, (0.5 - distanceToCenter) / 0.5) * pulse * 0.1;
-    
-    return { 
-      type: 't' as const, 
-      x: ix * (1 + displacement) + 0.5, 
-      y: iy * (1 + displacement) + 0.5 
+    const displacement =
+      Math.max(0, (0.5 - distanceToCenter) / 0.5) * pulse * 0.1;
+
+    return {
+      type: 't' as const,
+      x: ix * (1 + displacement) + 0.5,
+      y: iy * (1 + displacement) + 0.5,
     };
   },
 
@@ -51,22 +53,23 @@ export const animationPresets = {
   rotate: (uv: UV, mouse: Mouse, time: number = 0) => {
     const ix = uv.x - 0.5;
     const iy = uv.y - 0.5;
-    
+
     // 旋转动画
     const angle = time * 0.001;
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);
-    
+
     const rotatedX = ix * cos - iy * sin;
     const rotatedY = ix * sin + iy * cos;
-    
-    const distanceToEdge = Math.sqrt(rotatedX * rotatedX + rotatedY * rotatedY) - 0.3;
+
+    const distanceToEdge =
+      Math.sqrt(rotatedX * rotatedX + rotatedY * rotatedY) - 0.3;
     const displacement = Math.max(0, Math.min(1, (0.8 - distanceToEdge) / 0.8));
-    
-    return { 
-      type: 't' as const, 
-      x: rotatedX * displacement + 0.5, 
-      y: rotatedY * displacement + 0.5 
+
+    return {
+      type: 't' as const,
+      x: rotatedX * displacement + 0.5,
+      y: rotatedY * displacement + 0.5,
     };
   },
 
@@ -76,23 +79,23 @@ export const animationPresets = {
     const iy = uv.y - 0.5;
     const mouseX = mouse.x - 0.5;
     const mouseY = mouse.y - 0.5;
-    
+
     // 计算到鼠标的距离
     const dx = ix - mouseX;
     const dy = iy - mouseY;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    
+
     // 磁性吸引力
     const attraction = Math.max(0, (0.3 - distance) / 0.3) * 0.1;
     const attractionX = -dx * attraction;
     const attractionY = -dy * attraction;
-    
-    return { 
-      type: 't' as const, 
-      x: (ix + attractionX) + 0.5, 
-      y: (iy + attractionY) + 0.5 
+
+    return {
+      type: 't' as const,
+      x: ix + attractionX + 0.5,
+      y: iy + attractionY + 0.5,
     };
-  }
+  },
 };
 
 // 自定义 Hook
@@ -103,17 +106,17 @@ export function useLiquidGlass(config: LiquidGlassConfig = {}) {
   const startTimeRef = useRef<number>(Date.now());
 
   // 创建带动画的 fragment 函数
-  const createAnimatedFragment = useCallback((
-    baseFragment: FragmentFunction, 
-    animated: boolean = false
-  ) => {
-    if (!animated) return baseFragment;
-    
-    return (uv: UV, mouse: Mouse) => {
-      const currentTime = Date.now() - startTimeRef.current;
-      return baseFragment(uv, mouse);
-    };
-  }, []);
+  const createAnimatedFragment = useCallback(
+    (baseFragment: FragmentFunction, animated: boolean = false) => {
+      if (!animated) return baseFragment;
+
+      return (uv: UV, mouse: Mouse) => {
+        const currentTime = Date.now() - startTimeRef.current;
+        return baseFragment(uv, mouse);
+      };
+    },
+    []
+  );
 
   // 启动动画循环
   const startAnimation = useCallback((updateCallback: () => void) => {
@@ -149,10 +152,13 @@ export function useLiquidGlass(config: LiquidGlassConfig = {}) {
   }, [stopAnimation]);
 
   // 重新初始化
-  const reinitialize = useCallback((newConfig: LiquidGlassConfig = {}) => {
-    cleanup();
-    // 这里需要重新创建 shader，具体实现依赖于 LiquidGlass 组件的接口
-  }, [cleanup]);
+  const reinitialize = useCallback(
+    (newConfig: LiquidGlassConfig = {}) => {
+      cleanup();
+      // 这里需要重新创建 shader，具体实现依赖于 LiquidGlass 组件的接口
+    },
+    [cleanup]
+  );
 
   // 自动清理
   useEffect(() => {
@@ -168,7 +174,7 @@ export function useLiquidGlass(config: LiquidGlassConfig = {}) {
     updateShader,
     cleanup,
     reinitialize,
-    isAnimating: !!animationRef.current
+    isAnimating: !!animationRef.current,
   };
 }
 
@@ -190,7 +196,7 @@ export const presetConfigs = {
     height: 180,
     position: 'relative' as const,
     draggable: false,
-    borderRadius: 20
+    borderRadius: 20,
   },
 
   // 悬浮按钮
@@ -199,7 +205,7 @@ export const presetConfigs = {
     height: 50,
     position: 'fixed' as const,
     draggable: true,
-    borderRadius: 25
+    borderRadius: 25,
   },
 
   // 大型面板
@@ -208,7 +214,7 @@ export const presetConfigs = {
     height: 300,
     position: 'relative' as const,
     draggable: false,
-    borderRadius: 15
+    borderRadius: 15,
   },
 
   // 紧凑型
@@ -217,9 +223,9 @@ export const presetConfigs = {
     height: 100,
     position: 'relative' as const,
     draggable: false,
-    borderRadius: 12
-  }
+    borderRadius: 12,
+  },
 };
 
 // 导出类型
-export type { LiquidGlassConfig }; 
+export type { LiquidGlassConfig };
