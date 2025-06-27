@@ -1,116 +1,106 @@
 'use client';
 
-import { Card, Button, Space } from 'tdesign-react';
-import { InfoCircleIcon, BrowseIcon } from 'tdesign-icons-react';
+import React from 'react';
+import Link from 'next/link';
 import LiquidGlass, { presetFragments } from '@/components/LiquidGlass';
 
-export default function HomePage() {
+const DashboardPage: React.FC = () => {
   return (
-    <div className="space-y-6">
-      {/* 页面标题 */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          基础液体玻璃效果
-        </h1>
-        <p className="text-base text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          展示不同预设的基础液体玻璃效果，包括默认、强烈、交互和微妙四种风格
-        </p>
-      </div>
+    <div 
+      className=" bg-slate-950 relative overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, #1e293b 0%, #0f172a 100%)`,
+        fontFamily: 'Inter, sans-serif'
+      }}
+    >
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/10 to-emerald-900/20"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2MCA2MCI+PHBhdGggZD0iTTMwIDBsMjUuOTggMTV2MzBMMzAgNjAgNC4wMiA0NVYxNXoiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIgc3Ryb2tlLXdpZHRoPSIwLjUiLz48L3N2Zz4=')] opacity-40"></div>
 
-      {/* 效果展示区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* 默认效果 */}
-        <Card title="默认效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-blue-600">
-              <InfoCircleIcon />
-              <span className="text-sm">平衡的波动和响应</span>
-            </div>
-            <div className="relative h-56 bg-gradient-to-br from-blue-400 to-purple-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                fragment={presetFragments.default}
-                position="absolute"
-                className="inset-0"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  默认效果
-                </div>
+      {/* 减少到只有一个可拖拽的演示组件 */}
+      <LiquidGlass
+        width={200}
+        height={120}
+        fragment={presetFragments.interactive}
+        draggable={true}
+        position={{ x: 150, y: 100 }}
+        style={{ opacity: 0.9 }}
+      >
+        🧪 拖拽我！
+      </LiquidGlass>
+
+      {/* Header */}
+      <header className="relative z-10 pt-8 pb-6">
+        <div className="max-w-6xl mx-auto px-6">
+          <h1 className="text-5xl font-bold text-center text-white mb-4">
+            液态玻璃组件
+          </h1>
+          <p className="text-xl text-center text-slate-300 max-w-2xl mx-auto">
+            探索流动变形的玻璃效果，体验前沿的 WebGL 技术
+          </p>
+          <p className="text-sm text-center text-slate-400 mt-2">
+            💡 提示：拖拽上方的玻璃框体验交互效果
+          </p>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pb-12">
+        {/* Feature Grid - 移除内嵌的LiquidGlass组件，减少性能开销 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+          {/* Enhanced Slider */}
+          <Link href="/tabbar" className="group">
+            <div className="relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:transform hover:scale-105">
+              <div className="w-full h-32 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-lg mb-4 flex items-center justify-center">
+                <span className="text-2xl">🌊</span>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">滑块演示</h3>
+              <p className="text-slate-300 text-sm mb-4">
+                实时跟踪滑块的液态玻璃效果
+              </p>
+              <div className="text-blue-400 text-sm font-medium group-hover:text-blue-300">
+                体验流畅交互 →
               </div>
             </div>
-          </div>
-        </Card>
+          </Link>
 
-        {/* 强烈效果 */}
-        <Card title="强烈效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-red-600">
-              <BrowseIcon />
-              <span className="text-sm">更加明显的扭曲和波动</span>
-            </div>
-            <div className="relative h-56 bg-gradient-to-br from-red-400 to-orange-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                fragment={presetFragments.strong}
-                position="absolute"
-                className="inset-0"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  强烈效果
-                </div>
+          {/* Basic Examples */}
+          <Link href="/enhanced" className="group">
+            <div className="relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-300 hover:transform hover:scale-105">
+              <div className="w-full h-32 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-lg mb-4 flex items-center justify-center">
+                <span className="text-2xl">✨</span>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">基础效果</h3>
+              <p className="text-slate-300 text-sm mb-4">
+                多种液态变形效果展示
+              </p>
+              <div className="text-emerald-400 text-sm font-medium group-hover:text-emerald-300">
+                查看效果库 →
               </div>
             </div>
-          </div>
-        </Card>
+          </Link>
 
-        {/* 交互效果 */}
-        <Card title="交互效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-green-600">
-              <InfoCircleIcon />
-              <span className="text-sm">响应鼠标移动的动态效果</span>
-            </div>
-            <div className="relative h-56 bg-gradient-to-br from-green-400 to-teal-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                fragment={presetFragments.interactive}
-                position="absolute"
-                className="inset-0"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  交互效果
-                </div>
+          {/* Playground */}
+          <Link href="/playground" className="group">
+            <div className="relative bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-105">
+              <div className="w-full h-32 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg mb-4 flex items-center justify-center">
+                <span className="text-2xl">🎨</span>
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">实验场</h3>
+              <p className="text-slate-300 text-sm mb-4">
+                自定义参数和创意实验
+              </p>
+              <div className="text-purple-400 text-sm font-medium group-hover:text-purple-300">
+                开始创作 →
               </div>
             </div>
-          </div>
-        </Card>
+          </Link>
+        </div>
 
-        {/* 微妙效果 */}
-        <Card title="微妙效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-purple-600">
-              <BrowseIcon />
-              <span className="text-sm">轻微的波动，适合背景使用</span>
-            </div>
-            <div className="relative h-56 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                fragment={presetFragments.subtle}
-                position="absolute"
-                className="inset-0"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  微妙效果
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-      </div>
+        
+      </main>
     </div>
   );
-} 
+};
+
+export default DashboardPage; 

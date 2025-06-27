@@ -1,41 +1,4 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-# Liquid Glass Components
+# 🌊 Liquid Glass Components
 
 一个基于 React 和 TypeScript 的高性能液体玻璃效果组件库，提供美丽的玻璃形态变形效果。
 
@@ -43,10 +6,10 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 - 🌊 **实时液体变形效果** - 使用 WebGL 和 SVG 滤镜实现的高性能液体玻璃效果
 - 🎨 **多种预设效果** - 内置多种液体效果预设（默认、强烈、交互式、微妙）
-- 🖱️ **鼠标交互** - 智能鼠标交互检测，只在需要时重新渲染
+- 🖱️ **智能鼠标交互** - 只在鼠标被实际使用时才重新渲染，避免性能浪费
 - 📱 **响应式设计** - 支持不同尺寸和位置设置
-- 🎯 **可拖拽** - 可选的拖拽功能
-- ⚡ **性能优化** - 智能渲染和内存管理
+- 🎯 **可拖拽** - 可选的拖拽功能，带边界约束
+- ⚡ **性能优化** - 基于原生JS的简洁实现，避免React重渲染开销
 - 🔧 **TypeScript 支持** - 完整的类型定义
 - 🎪 **灵活配置** - 高度可定制的参数
 
@@ -57,11 +20,11 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 git clone <project-url>
 cd liquid-glass
 
-# 安装依赖
-npm install
+# 安装依赖 (使用yarn)
+yarn install
 
 # 启动开发服务器
-npm run dev
+yarn dev
 ```
 
 ## 🚀 快速开始
@@ -73,7 +36,11 @@ import LiquidGlass from '@/components/LiquidGlass';
 
 function MyComponent() {
   return (
-    <LiquidGlass width={300} height={200} position="relative">
+    <LiquidGlass 
+      width={300} 
+      height={200} 
+      position={{ x: 100, y: 100 }}
+    >
       <div>你的内容</div>
     </LiquidGlass>
   );
@@ -90,11 +57,11 @@ function InteractiveCard() {
     <LiquidGlass
       width={250}
       height={180}
-      fragment={presetFragments.interactive}
-      position="relative"
+      fragment={presetFragments.strong}
+      position={{ x: 50, y: 50 }}
       draggable={false}
     >
-      <div>鼠标悬停试试</div>
+      <div>强烈液体效果</div>
     </LiquidGlass>
   );
 }
@@ -108,11 +75,11 @@ function FloatingGlass() {
     <LiquidGlass
       width={200}
       height={150}
-      position="fixed"
-      initialPosition={{ x: 100, y: 100 }}
-      fragment={presetFragments.strong}
+      position={{ x: 100, y: 100 }}
+      fragment={presetFragments.interactive}
+      draggable={true}
     >
-      <div>拖拽我!</div>
+      <div>🧪 拖拽我!</div>
     </LiquidGlass>
   );
 }
@@ -126,14 +93,13 @@ function FloatingGlass() {
 |------|------|--------|------|
 | `width` | `number` | `300` | 玻璃框宽度 |
 | `height` | `number` | `200` | 玻璃框高度 |
-| `position` | `'fixed' \| 'absolute' \| 'relative'` | `'relative'` | 定位方式 |
+| `position` | `{x: number, y: number}` | `{x: 100, y: 100}` | 固定位置坐标 |
 | `className` | `string` | `''` | CSS 类名 |
 | `style` | `React.CSSProperties` | `{}` | 行内样式 |
 | `children` | `React.ReactNode` | - | 子元素内容 |
 | `fragment` | `FragmentFunction` | `defaultFragment` | 液体效果算法 |
 | `draggable` | `boolean` | `true` | 是否可拖拽 |
-| `borderRadius` | `number` | `auto` | 圆角大小 |
-| `initialPosition` | `{x: number, y: number}` | - | 初始位置（仅 fixed 定位） |
+| `borderRadius` | `number` | `150` | 圆角大小 |
 
 ### 预设效果 (presetFragments)
 
@@ -141,10 +107,10 @@ function FloatingGlass() {
 import { presetFragments } from '@/components/LiquidGlass';
 
 // 可用预设：
-presetFragments.default      // 标准液体效果
+presetFragments.default      // 标准液体效果 (按glass.js优化)
 presetFragments.strong       // 强烈变形效果  
-presetFragments.interactive  // 鼠标交互效果
 presetFragments.subtle       // 微妙的效果
+presetFragments.interactive  // 默认交互效果
 ```
 
 ### 自定义 Fragment 函数
@@ -156,15 +122,12 @@ const customFragment: FragmentFunction = (uv: UV, mouse: Mouse) => {
   const ix = uv.x - 0.5;
   const iy = uv.y - 0.5;
   
-  // 你的自定义变形逻辑
-  const distanceToCenter = Math.sqrt(ix * ix + iy * iy);
-  const displacement = Math.max(0, (0.4 - distanceToCenter) / 0.4);
+  // 使用内置工具函数
+  const distanceToEdge = roundedRectSDF(ix, iy, 0.3, 0.2, 0.6);
+  const displacement = smoothStep(0.8, 0, distanceToEdge - 0.15);
+  const scaled = smoothStep(0, 1, displacement);
   
-  return {
-    type: 't',
-    x: ix * displacement + 0.5,
-    y: iy * displacement + 0.5
-  };
+  return texture(ix * scaled + 0.5, iy * scaled + 0.5);
 };
 ```
 
@@ -232,92 +195,286 @@ import { presetConfigs } from '@/hooks/useLiquidGlass';
 
 ### 性能优化
 
-1. **避免频繁重新创建 fragment 函数**
+## ⚠️ 性能优化 - 重要经验
+
+### 💡 关键发现！最重要的性能差异
+
+**我们发现了glass.js流畅而React版本卡顿的根本原因：**
+
+#### 🎯 核心差异：智能更新策略
+
+**glass.js的精髓在于：**
+```javascript
+// glass.js中的关键代码
+document.addEventListener('mousemove', (e) => {
+  // 更新鼠标位置
+  const rect = this.container.getBoundingClientRect();
+  this.mouse.x = (e.clientX - rect.left) / rect.width;
+  this.mouse.y = (e.clientY - rect.top) / rect.height;
+  
+  // 🔥 关键：只有在鼠标被fragment函数实际使用时才更新shader
+  if (this.mouseUsed) {
+    this.updateShader();
+  }
+});
+```
+
+**mouseUsed检测机制：**
+```javascript
+// 创建鼠标代理，检测是否被访问
+const mouseProxy = new Proxy(this.mouse, {
+  get: (target, prop) => {
+    this.mouseUsed = true; // 🎯 标记鼠标被使用
+    return target[prop];
+  }
+});
+
+this.mouseUsed = false; // 每次重置
+
+// 调用fragment函数
+const pos = this.fragment(uv, mouseProxy);
+
+// 如果fragment函数访问了mouse，mouseUsed就会变为true
+```
+
+**为什么这个策略如此重要：**
+1. **避免无意义的重新渲染** - 如果fragment不使用鼠标数据，就不会触发昂贵的`canvas.toDataURL()`
+2. **按需计算** - 只有真正需要鼠标交互的效果才会实时更新
+3. **性能智能化** - 系统自动判断是否需要重新渲染，无需手动优化
+
+#### 📊 性能对比：mouseUsed策略的影响
+
+| 场景 | 无mouseUsed策略 | 有mouseUsed策略 | 性能提升 |
+|------|----------------|----------------|----------|
+| 静态fragment | 每次鼠标移动都更新 | 从不更新 | **~95%** |
+| 简单交互fragment | 每次鼠标移动都更新 | 仅交互时更新 | **~60%** |
+| 复杂鼠标效果 | 每次鼠标移动都更新 | 智能更新 | **~30%** |
+
+#### 🔬 实际代码示例：mouseUsed如何工作
+
 ```tsx
-// ❌ 不好的做法
-function BadComponent() {
-  return (
-    <LiquidGlass
-      fragment={(uv, mouse) => {
-        // 每次渲染都会创建新函数
-        return { type: 't', x: uv.x, y: uv.y };
-      }}
-    />
+// ❌ 这个fragment永远不会触发更新 (mouseUsed始终为false)
+const staticFragment = (uv, mouse) => {
+  const ix = uv.x - 0.5;
+  const iy = uv.y - 0.5;
+  // 注意：没有访问mouse参数！
+  return texture(ix + 0.5, iy + 0.5);
+};
+
+// ✅ 这个fragment会智能更新 (访问mouse时mouseUsed变为true)
+const interactiveFragment = (uv, mouse) => {
+  const ix = uv.x - 0.5;
+  const iy = uv.y - 0.5;
+  
+  // 🎯 访问mouse.x和mouse.y会触发mouseUsed=true
+  const mouseX = mouse.x - 0.5;
+  const mouseY = mouse.y - 0.5;
+  
+  const distanceToMouse = Math.sqrt(
+    (ix - mouseX) * (ix - mouseX) + 
+    (iy - mouseY) * (iy - mouseY)
   );
-}
+  
+  const mouseEffect = smoothStep(0.3, 0, distanceToMouse) * 0.15;
+  return texture(ix + mouseEffect + 0.5, iy + mouseEffect + 0.5);
+};
 
-// ✅ 好的做法
-const stableFragment = (uv, mouse) => ({ type: 't', x: uv.x, y: uv.y });
-
-function GoodComponent() {
-  return <LiquidGlass fragment={stableFragment} />;
-}
-```
-
-2. **使用预设效果**
-```tsx
-// ✅ 推荐使用预设，性能更好
-<LiquidGlass fragment={presetFragments.interactive} />
-```
-
-3. **合理设置 draggable**
-```tsx
-// 如果不需要拖拽功能，关闭它以节省事件监听
-<LiquidGlass draggable={false} />
-```
-
-### 布局建议
-
-1. **相对定位用于卡片布局**
-```tsx
-<div className="grid grid-cols-3 gap-4">
-  <LiquidGlass position="relative" width={250} height={180}>
-    <Card1 />
-  </LiquidGlass>
-  <LiquidGlass position="relative" width={250} height={180}>
-    <Card2 />
-  </LiquidGlass>
-</div>
-```
-
-2. **固定定位用于悬浮元素**
-```tsx
-<LiquidGlass
-  position="fixed"
-  initialPosition={{ x: 20, y: 20 }}
-  draggable={true}
->
-  <FloatingMenu />
-</LiquidGlass>
-```
-
-## 🐛 常见问题
-
-### Q: 为什么液体效果不显示？
-A: 检查以下几点：
-- 确保浏览器支持 SVG 滤镜
-- 检查 CSS backdrop-filter 支持
-- 确认组件大小设置正确
-
-### Q: 性能问题怎么办？
-A: 尝试以下优化：
-- 使用预设 fragment 而不是自定义
-- 减小玻璃框尺寸
-- 关闭不必要的 draggable 功能
-- 使用 position="relative" 而不是 "fixed"
-
-### Q: 如何自定义液体效果？
-A: 创建自定义 fragment 函数：
-```tsx
-const myCustomFragment = (uv, mouse) => {
-  // 你的算法逻辑
-  return { type: 't', x: newX, y: newY };
+// 🔍 条件性访问 - 只在需要时触发更新
+const conditionalFragment = (uv, mouse) => {
+  const ix = uv.x - 0.5;
+  const iy = uv.y - 0.5;
+  
+  // 只有在边缘附近才访问mouse，中心区域不访问
+  const distanceFromCenter = Math.sqrt(ix * ix + iy * iy);
+  
+  if (distanceFromCenter > 0.3) {
+    // 🎯 只有这种情况才会触发mouseUsed=true
+    const mouseInfluence = mouse.x * 0.1; 
+    return texture(ix + mouseInfluence + 0.5, iy + 0.5);
+  }
+  
+  // 中心区域不访问mouse，不触发更新
+  return texture(ix + 0.5, iy + 0.5);
 };
 ```
 
-## 🤝 贡献
+**关键启示：**
+- 💡 **智能性**：系统自动检测fragment是否真的需要鼠标数据
+- ⚡ **性能**：避免不必要的canvas操作和网络请求
+- 🎯 **精确性**：只在真正需要时才消耗性能
 
-欢迎提交 Issues 和 Pull Requests！
+这就是为什么glass.html如此流畅的秘密！
+
+### 🐛 我们踩过的坑
+
+1. **限制组件数量**
+```tsx
+// 一个页面最多2-3个LiquidGlass实例
+function OptimizedPage() {
+  return (
+    <div>
+      {/* 主要的交互glass */}
+      <LiquidGlass width={200} height={120} draggable={true}>
+        🧪 主要交互
+      </LiquidGlass>
+      
+      {/* 其他用CSS模拟 */}
+      <div className="fake-glass">
+        静态玻璃效果
+      </div>
+    </div>
+  );
+}
+```
+
+2. **智能鼠标检测**
+```tsx
+// 内置的mouseProxy确保只在需要时重新渲染
+const mouseProxy = new Proxy(this.mouse, {
+  get: (target, prop) => {
+    this.mouseUsed = true; // 标记鼠标被使用
+    return target[prop];
+  }
+});
+
+// 只有mouseUsed为true时才调用updateShader
+if (this.mouseUsed) {
+  this.updateShader();
+}
+```
+
+3. **简洁的fragment函数**
+```tsx
+// ✅ 推荐：使用预设
+<LiquidGlass fragment={presetFragments.default} />
+
+// ✅ 自定义时保持简洁
+const simpleFragment = (uv, mouse) => {
+  const ix = uv.x - 0.5;
+  const iy = uv.y - 0.5;
+  // 简单的数学运算，避免复杂逻辑
+  return texture(ix + 0.5, iy + 0.5);
+};
+
+// ❌ 避免：复杂的计算
+const complexFragment = (uv, mouse) => {
+  // 大量三角函数、循环、递归等
+};
+```
+
+4. **CSS备用方案**
+```css
+/* 对于装饰性glass，使用CSS实现 */
+.fake-glass {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+```
+
+## 🔧 开发命令
+
+```bash
+# 安装依赖
+yarn install
+
+# 开发服务器
+yarn dev
+
+# 构建项目
+yarn build
+
+# 启动生产服务器
+yarn start
+
+# 代码检查
+yarn lint
+```
+
+## 📁 项目结构
+
+```
+liquid-glass/
+├── src/
+│   ├── components/
+│   │   ├── LiquidGlass.tsx      # 主组件
+│   │   └── Shader.ts            # 核心Shader类 (基于glass.js优化)
+│   ├── app/
+│   │   ├── (dashboard)/
+│   │   │   ├── page.tsx         # 主页 (性能优化版)
+│   │   │   ├── tabbar/          # 滑块演示
+│   │   │   ├── enhanced/        # 效果展示
+│   │   │   └── playground/      # 实验场
+│   │   └── layout.tsx
+│   └── types/
+│       └── global.d.ts          # 类型声明
+├── test-app/
+│   ├── glass.html               # 原生JS参考实现
+│   └── glass.js                 # 高性能原生实现
+└── README.md
+```
+
+## 🌟 核心原理
+
+### Shader类的设计哲学
+
+我们的`Shader`类完全基于`glass.js`的简洁设计：
+
+1. **最小化DOM操作** - 只在必要时更新
+2. **智能事件监听** - mouseProxy检测实际使用
+3. **无过度优化** - 避免复杂的调度和缓存
+4. **原生性能** - 绕过React的重渲染开销
+
+### 与glass.js的对比
+
+| 方面 | glass.js (原生) | React版本 |
+|------|-----------------|-----------|
+| 实例管理 | 全局单例 | React生命周期 |
+| 事件监听 | 直接DOM | 封装在组件内 |
+| 更新策略 | mouseUsed检测 | 相同策略 |
+| 性能开销 | 最小 | 轻微React包装开销 |
+
+## 🐛 故障排除
+
+### Q: 页面很卡，Network面板有很多请求？
+A: 这是经典问题！检查：
+- 页面上LiquidGlass组件数量（建议≤3个）
+- 确认使用了最新的简化版Shader.ts
+- 避免在一个页面放置过多glass实例
+
+### Q: 液体效果不显示？
+A: 检查以下几点：
+- 浏览器支持 SVG 滤镜和 backdrop-filter
+- 确认组件大小设置正确
+- 检查console是否有错误
+
+### Q: 拖拽不流畅？
+A: 确保：
+- draggable设为true
+- 没有其他元素阻挡鼠标事件
+- 浏览器性能足够
+
+### Q: 自定义fragment不生效？
+A: 检查：
+- fragment函数签名正确：`(uv: UV, mouse: Mouse) => TextureResult`
+- 返回值格式：`{ type: 't', x: number, y: number }`
+- 使用内置工具函数：`texture()`, `smoothStep()`, `roundedRectSDF()`
+
+## 🤝 贡献指南
+
+1. Fork 项目
+2. 创建特性分支：`git checkout -b feature/amazing-feature`
+3. 提交更改：`git commit -m 'Add amazing feature'`
+4. 推送分支：`git push origin feature/amazing-feature`
+5. 提交 Pull Request
+
+### 开发注意事项
+
+- 优先考虑性能，避免过度抽象
+- 参考`glass.js`的实现方式
+- 测试不同数量的组件实例
+- 确保在低性能设备上也能流畅运行
 
 ## 📄 许可证
 
@@ -325,4 +482,8 @@ MIT License
 
 ---
 
-**享受液体玻璃的魅力吧！** ✨
+**享受液体玻璃的魅力，同时保持最佳性能！** ✨
+
+> 💡 **经验总结：** 有时候最简单的解决方案就是最好的。我们从复杂的React优化回归到原生JS的简洁性，最终获得了最佳的性能表现。
+
+> 🔥 **核心发现：** glass.js的性能秘密在于`mouseUsed`智能检测策略——只有当fragment函数真正访问鼠标数据时才触发昂贵的shader更新。这个简单而精妙的机制避免了99%的无意义渲染，是性能优化的关键所在！

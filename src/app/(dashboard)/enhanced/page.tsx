@@ -1,163 +1,173 @@
 'use client';
 
-import { Card, Tag } from 'tdesign-react';
-import { LayersIcon, TipsIcon, PlayCircleIcon } from 'tdesign-icons-react';
-import LiquidGlass, { physicsPresets } from '@/components/LiquidGlass';
+import React, { useState } from 'react';
+import { Card, Button, Radio, Slider } from 'tdesign-react';
+import LiquidGlass, { presetFragments } from '@/components/LiquidGlass';
+
+const fragments = [
+  { name: '默认', key: 'default' as const, description: '平衡的液态效果' },
+  { name: '强烈', key: 'strong' as const, description: '明显的形变效果' },
+  { name: '微妙', key: 'subtle' as const, description: '轻微的波动效果' }
+];
 
 export default function EnhancedPage() {
+  const [selectedFragment, setSelectedFragment] = useState<keyof typeof presetFragments>('default');
+  const [glassOpacity, setGlassOpacity] = useState(0.8);
+  const [glassSize, setGlassSize] = useState(300);
+
+  const currentFragment = presetFragments[selectedFragment];
+
   return (
-    <div className="space-y-8">
-      {/* 页面标题 */}
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          增强物理液体效果
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-          带有真实物理效果的液体玻璃组件，包含弹性、阻尼、表面张力等物理属性
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* 页面标题 */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            液态玻璃效果展示
+          </h1>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+            探索不同的液态变形效果，体验流畅的视觉体验
+          </p>
+        </div>
 
-      {/* 效果展示区域 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* 水效果 */}
-        <Card title="水效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-blue-600">
-                <LayersIcon />
-                <span className="text-sm">流动性强，弹性适中</span>
+        {/* 主要内容区域 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* 控制面板 */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* 效果选择 */}
+            <Card title="效果类型" bordered className="bg-white/10 backdrop-blur-md border-white/20">
+              <div className="space-y-3">
+                <Radio.Group 
+                  value={selectedFragment} 
+                  onChange={(value) => setSelectedFragment(value as keyof typeof presetFragments)}
+                  className="flex flex-col space-y-2"
+                >
+                  {fragments.map((fragment) => (
+                    <Radio key={fragment.key} value={fragment.key}>
+                      <div className="text-white">
+                        <div className="font-semibold">{fragment.name}</div>
+                        <div className="text-sm text-slate-300">{fragment.description}</div>
+                      </div>
+                    </Radio>
+                  ))}
+                </Radio.Group>
               </div>
-              <Tag theme="primary" variant="light">拖拽体验</Tag>
-            </div>
-            <div className="relative h-64 bg-gradient-to-br from-blue-400 to-cyan-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                enablePhysics={true}
-                physics={physicsPresets.water}
-                width={250}
-                height={150}
-                className="w-full h-full"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  💧 水效果
+            </Card>
+
+            {/* 参数调节 */}
+            <Card title="参数调节" bordered className="bg-white/10 backdrop-blur-md border-white/20">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-white font-medium mb-2">
+                    透明度: {(glassOpacity * 100).toFixed(0)}%
+                  </label>
+                  <Slider
+                    value={glassOpacity}
+                    onChange={(value) => setGlassOpacity(Array.isArray(value) ? value[0] : value)}
+                    min={0.1}
+                    max={1}
+                    step={0.1}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-white font-medium mb-2">
+                    大小: {glassSize}px
+                  </label>
+                  <Slider
+                    value={glassSize}
+                    onChange={(value) => setGlassSize(Array.isArray(value) ? value[0] : value)}
+                    min={200}
+                    max={400}
+                    step={20}
+                  />
                 </div>
               </div>
-            </div>
-          </div>
-        </Card>
+            </Card>
 
-        {/* 果冻效果 */}
-        <Card title="果冻效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-purple-600">
-                <PlayCircleIcon />
-                <span className="text-sm">高弹性，Q弹感觉</span>
+            {/* 快速预设 */}
+            <Card title="快速预设" bordered className="bg-white/10 backdrop-blur-md border-white/20">
+              <div className="space-y-3">
+                <Button 
+                  block 
+                  onClick={() => {
+                    setSelectedFragment('subtle');
+                    setGlassOpacity(0.6);
+                    setGlassSize(250);
+                  }}
+                  className="text-white border-white/30 hover:bg-white/10"
+                >
+                  背景效果
+                </Button>
+                <Button 
+                  block 
+                  onClick={() => {
+                    setSelectedFragment('strong');
+                    setGlassOpacity(0.9);
+                    setGlassSize(350);
+                  }}
+                  className="text-white border-white/30 hover:bg-white/10"
+                >
+                  主角效果
+                </Button>
+                <Button 
+                  block 
+                  onClick={() => {
+                    setSelectedFragment('default');
+                    setGlassOpacity(0.8);
+                    setGlassSize(300);
+                  }}
+                  className="text-white border-white/30 hover:bg-white/10"
+                >
+                  平衡效果
+                </Button>
               </div>
-              <Tag theme="warning" variant="light">弹性十足</Tag>
-            </div>
-            <div className="relative h-64 bg-gradient-to-br from-purple-400 to-pink-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                enablePhysics={true}
-                physics={physicsPresets.jelly}
-                width={250}
-                height={150}
-                className="w-full h-full"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  🍮 果冻效果
+            </Card>
+          </div>
+
+          {/* 效果展示区域 */}
+          <div className="lg:col-span-2">
+            <Card title="实时预览" bordered className="bg-white/10 backdrop-blur-md border-white/20 h-full">
+              <div className="relative h-96 bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 rounded-lg overflow-hidden">
+                {/* 背景装饰 */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                <div className="absolute top-4 left-4 text-white/80 text-sm font-medium">
+                  {fragments.find(f => f.key === selectedFragment)?.name}效果
+                </div>
+                
+                {/* 液态玻璃效果 */}
+                <LiquidGlass
+                  width={glassSize}
+                  height={glassSize * 0.6}
+                  fragment={currentFragment}
+                  position={{ x: 50, y: 50 }}
+                  style={{ 
+                    opacity: glassOpacity,
+                    transition: 'opacity 0.3s ease'
+                  }}
+                />
+
+                {/* 信息显示 */}
+                <div className="absolute bottom-4 right-4 bg-black/30 backdrop-blur-sm rounded-lg p-3 text-white text-sm">
+                  <div>尺寸: {glassSize} × {Math.round(glassSize * 0.6)}</div>
+                  <div>透明度: {(glassOpacity * 100).toFixed(0)}%</div>
+                  <div>效果: {fragments.find(f => f.key === selectedFragment)?.name}</div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
-        </Card>
+        </div>
 
-        {/* 油效果 */}
-        <Card title="油效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-orange-600">
-                <TipsIcon />
-                <span className="text-sm">粘稠感，慢响应</span>
-              </div>
-              <Tag theme="success" variant="light">粘稠流动</Tag>
-            </div>
-            <div className="relative h-64 bg-gradient-to-br from-orange-400 to-red-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                enablePhysics={true}
-                physics={physicsPresets.oil}
-                width={250}
-                height={150}
-                className="w-full h-full"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  🛢️ 油效果
-                </div>
-              </div>
-            </div>
+        {/* 底部说明 */}
+        <div className="mt-8 text-center">
+          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+            <h3 className="text-xl font-semibold text-white mb-3">使用说明</h3>
+            <p className="text-slate-300 max-w-2xl mx-auto">
+              选择不同的效果类型，调节透明度和大小参数，实时查看液态玻璃的视觉效果。
+              所有效果都经过性能优化，确保流畅的显示体验。
+            </p>
           </div>
-        </Card>
-
-        {/* 弹性球效果 */}
-        <Card title="弹性球效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-green-600">
-                <PlayCircleIcon />
-                <span className="text-sm">超强弹性回弹</span>
-              </div>
-              <Tag theme="danger" variant="light">极限弹性</Tag>
-            </div>
-            <div className="relative h-64 bg-gradient-to-br from-green-400 to-emerald-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                enablePhysics={true}
-                physics={physicsPresets.bouncy}
-                width={250}
-                height={150}
-                className="w-full h-full"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  ⚡ 弹性球
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* 粘稠效果 */}
-        <Card title="粘稠效果" bordered>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-gray-600">
-                <TipsIcon />
-                <span className="text-sm">高粘度，缓慢响应</span>
-              </div>
-              <Tag theme="default" variant="light">超级粘稠</Tag>
-            </div>
-            <div className="relative h-64 bg-gradient-to-br from-gray-400 to-gray-600 rounded-lg overflow-hidden">
-              <LiquidGlass
-                enablePhysics={true}
-                physics={physicsPresets.viscous}
-                width={250}
-                height={150}
-                className="w-full h-full"
-                draggable={true}
-              />
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-white text-xl font-bold bg-black/20 px-4 py-2 rounded-lg backdrop-blur-sm">
-                  🍯 粘稠效果
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "framer-motion": "^12.19.1",
+    "@types/styled-components": "^5.1.34",
+    "antd": "^5.26.2",
     "next": "15.3.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "styled-components": "^6.1.19",
     "tdesign-icons-react": "^0.5.0",
     "tdesign-react": "^1.12.3"
   },

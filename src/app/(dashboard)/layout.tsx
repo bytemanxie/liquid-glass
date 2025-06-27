@@ -22,25 +22,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       value: '/',
       label: '基础效果',
       icon: <ViewModuleIcon />,
-      description: '展示基础的液体玻璃效果'
     },
     {
       value: '/enhanced',
       label: '物理效果',
       icon: <LayersIcon />,
-      description: '增强的物理液体效果'
     },
     {
       value: '/playground',
       label: '效果实验室',
       icon: <ControlPlatformIcon />,
-      description: '自定义和实验各种效果'
     },
     {
       value: '/tabbar',
       label: 'Tab栏滤镜',
       icon: <ViewModuleIcon />,
-      description: 'iOS风格的液态玻璃Tab栏效果'
     }
   ];
 
@@ -110,9 +106,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 }
               `}>
                 {item.label}
-              </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {item.description}
               </div>
             </div>
           </div>
