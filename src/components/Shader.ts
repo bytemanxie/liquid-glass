@@ -51,7 +51,6 @@ function generateId(): string {
   return 'liquid-glass-' + Math.random().toString(36).substr(2, 9);
 }
 
-// 简化版Shader类 - 完全按照glass.js的方式
 export class Shader {
   width: number;
   height: number;
@@ -260,7 +259,6 @@ export class Shader {
     parent.appendChild(this.container);
   }
 
-  // 完全按照glass.js的方式 - 最简单的实现
   updateShader() {
     const mouseProxy = new Proxy(this.mouse, {
       get: (target, prop) => {
@@ -322,6 +320,5 @@ export class Shader {
   }
 }
 
-// 导出类型和工具函数
 export type { UV, Mouse, TextureResult, FragmentFunction };
 export { smoothStep, length, roundedRectSDF, texture, generateId };

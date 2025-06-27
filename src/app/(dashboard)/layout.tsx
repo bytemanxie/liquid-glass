@@ -18,7 +18,6 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const [drawerVisible, setDrawerVisible] = useState(false);
 

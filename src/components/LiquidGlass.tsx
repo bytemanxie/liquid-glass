@@ -31,17 +31,14 @@ const createAdaptiveFragment = (width: number, height: number): FragmentFunction
     const ix = uv.x - 0.5;
     const iy = uv.y - 0.5;
     
-    // 计算宽高比，确保圆形效果
     const aspectRatio = width / height;
-    const radius = Math.min(width, height) * 0.0025; // 自适应圆角
+    const radius = Math.min(width, height) * 0.0025; 
     
     let halfWidth, halfHeight;
     if (aspectRatio > 1) {
-      // 宽度大于高度
       halfWidth = 0.4;
       halfHeight = 0.4 / aspectRatio;
     } else {
-      // 高度大于宽度
       halfWidth = 0.4 * aspectRatio;
       halfHeight = 0.4;
     }
@@ -88,7 +85,6 @@ export default function LiquidGlass({
       ? createAdaptiveFragment(width, height)
       : fragment;
 
-    // 创建新的shader - 完全按照glass.js的方式
     const shader = new Shader({
       width,
       height,
@@ -113,7 +109,6 @@ export default function LiquidGlass({
     };
   }, [createShader]);
 
-  // 简单的容器 - 只用于children显示
   return (
     <div
       ref={containerRef}
