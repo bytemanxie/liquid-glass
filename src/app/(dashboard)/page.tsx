@@ -43,37 +43,7 @@ const MainContent = styled.div`
   margin: 0 2rem;
 `;
 
-// 标题区域
-const TitleSection = styled.div`
-  text-align: center;
-  margin-bottom: 2rem;
-`;
 
-const MainTitle = styled.h1`
-  font-size: 2.25rem; /* text-4xl */
-  font-weight: bold;
-  color: white;
-  margin-bottom: 0.5rem;
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.125rem; /* text-lg */
-  color: rgba(255, 255, 255, 0.9);
-`;
-
-// 状态指示器
-const GlassIndicator = styled.div<{
-  $isDragging: boolean;
-  $isVisible: boolean;
-}>`
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  color: ${props => {
-    if (props.$isDragging) return '#93c5fd'; /* blue-300 */
-    return 'rgba(255, 255, 255, 0.6)';
-  }};
-`;
 
 // 滑块容器
 const SliderContainer = styled.div`
