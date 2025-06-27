@@ -55,6 +55,56 @@ function generateId(): string {
   return 'delayed-filter-' + Math.random().toString(36).substr(2, 9);
 }
 
+// 移动端检测
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  // 多重检测确保准确性
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+  const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const isSmallScreen = window.innerWidth <= 768;
+  
+  // iOS Safari 特殊检测
+  const isIOS = /ipad|iphone|ipod/.test(userAgent);
+  const isIOSSafari = isIOS && /safari/.test(userAgent) && !/chrome|crios|fxios/.test(userAgent);
+  
+  return isMobileUA || isIOSSafari || (isTouchDevice && isSmallScreen);
+}
+
+// 检测backdrop-filter支持
+function supportsBackdropFilter(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const testElement = document.createElement('div');
+  const style = testElement.style as any;
+  style.backdropFilter = 'blur(1px)';
+  style.webkitBackdropFilter = 'blur(1px)';
+  
+  return style.backdropFilter !== '' || style.webkitBackdropFilter !== '';
+}
+
+// 检测SVG滤镜支持
+function supportsSVGFilters(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    // 更准确的SVG滤镜检测
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+    const feDisplacementMap = document.createElementNS('http://www.w3.org/2000/svg', 'feDisplacementMap');
+    
+    filter.appendChild(feDisplacementMap);
+    svg.appendChild(filter);
+    
+    // 检测Canvas和toDataURL支持
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    return !!(ctx && canvas.toDataURL && typeof canvas.toDataURL === 'function');
+  } catch {
+    return false;
+  }
+}
+
 interface DelayedFilterProps {
   width: number;
   height: number;
@@ -90,6 +140,10 @@ export default function DelayedFilter({
   delayStrength = 0.2,
   draggable = true,
 }: DelayedFilterProps) {
+  // 移动端检测状态
+  const [isMobile, setIsMobile] = useState(false);
+  const [useFallback, setUseFallback] = useState(false);
+
   // 增强液体系统状态
   const [targetMouse, setTargetMouse] = useState({ x: 0.5, y: 0.5 });
   const [internalMouse, setInternalMouse] = useState({ x: 0.5, y: 0.5 });
@@ -120,6 +174,120 @@ export default function DelayedFilter({
   
   const [filterId] = useState(() => generateId());
   const canvasDPI = 1;
+
+  // 初始化移动端检测
+  useEffect(() => {
+    const mobile = isMobileDevice();
+    const svgSupport = supportsSVGFilters();
+    const backdropSupport = supportsBackdropFilter();
+    
+    setIsMobile(mobile);
+    
+    // 更严格的降级条件：移动端且不完全支持复杂滤镜
+    const shouldUseFallback = mobile && (!svgSupport || !backdropSupport);
+    setUseFallback(shouldUseFallback);
+  }, []);
+
+  // 生成移动端CSS模拟效果
+  const generateMobileFallback = useCallback(() => {
+    if (!useFallback) return {};
+    
+    const mx = internalMouse.x;
+    const my = internalMouse.y;
+    const speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+    
+    // 生成更明显的动态边缘扭曲
+    const generateEnhancedClipPath = () => {
+      const baseDistortion = isDragging ? 0.25 : 0.15; // 增大扭曲程度
+      const speedBoost = speed * 0.3; // 速度影响
+      const totalDistortion = baseDistortion + speedBoost;
+      
+      const points = [];
+      const numPoints = 20; // 增加控制点数量让边缘更平滑
+      
+      for (let i = 0; i < numPoints; i++) {
+        const angle = (i / numPoints) * Math.PI * 2;
+        const baseRadius = 46; // 基础半径
+        
+        // 基础椭圆坐标
+        const baseX = 50 + Math.cos(angle) * baseRadius;
+        const baseY = 50 + Math.sin(angle) * (baseRadius * 0.9); // 稍微扁一点
+        
+        // 鼠标位置影响
+        const distanceToMouse = Math.sqrt(
+          Math.pow((baseX - mx * 100) / 100, 2) + 
+          Math.pow((baseY - my * 100) / 100, 2)
+        );
+        
+        // 扭曲计算
+        const mouseFactor = Math.exp(-distanceToMouse * 2.5) * totalDistortion;
+        
+        // 时间动画
+        const time = Date.now() * 0.003;
+        const waveEffect = Math.sin(time + angle * 4) * 0.03;
+        const pulseEffect = Math.cos(time * 0.7 + angle * 2) * 0.02;
+        
+        // 速度方向影响
+        const velocityEffect = (velocity.x * Math.cos(angle) + velocity.y * Math.sin(angle)) * 0.1;
+        
+        // 最终坐标计算
+        const distortionX = (mx * 100 - baseX) * mouseFactor;
+        const distortionY = (my * 100 - baseY) * mouseFactor;
+        
+        const finalX = baseX + distortionX + waveEffect * 100 + velocityEffect * 50;
+        const finalY = baseY + distortionY + pulseEffect * 100;
+        
+        // 确保在边界内
+        const clampedX = Math.max(5, Math.min(95, finalX));
+        const clampedY = Math.max(5, Math.min(95, finalY));
+        
+        points.push(`${clampedX}% ${clampedY}%`);
+      }
+      
+      return `polygon(${points.join(', ')})`;
+    };
+    
+    // 增强背景效果
+    const gradientIntensity = isDragging ? 0.35 : 0.2;
+    const gradientSize = 35 + speed * 25;
+    
+    return {
+      clipPath: generateEnhancedClipPath(),
+      background: `
+        radial-gradient(
+          ellipse ${gradientSize}% ${gradientSize * 0.8}% at ${mx * 100}% ${my * 100}%, 
+          rgba(255, 255, 255, ${gradientIntensity}) 0%, 
+          rgba(255, 255, 255, ${gradientIntensity * 0.7}) 25%, 
+          rgba(255, 255, 255, ${gradientIntensity * 0.4}) 50%, 
+          transparent 75%
+        ),
+        conic-gradient(
+          from ${velocity.x * 120}deg at ${mx * 100}% ${my * 100}%,
+          transparent 0deg,
+          rgba(255, 255, 255, 0.08) 60deg,
+          transparent 120deg,
+          rgba(255, 255, 255, 0.05) 240deg,
+          transparent 360deg
+        )
+      `,
+      backdropFilter: `blur(${8 + speed * 3}px) saturate(${1.3 + speed * 0.2}) contrast(${1.15 + speed * 0.1})`,
+      WebkitBackdropFilter: `blur(${8 + speed * 3}px) saturate(${1.3 + speed * 0.2}) contrast(${1.15 + speed * 0.1})`,
+      transform: `
+        scale(${scale}) 
+        scale(${1.01 + speed * 0.03}) 
+        rotate(${velocity.x * 8}deg)
+        ${isDragging ? 'scale(1.015)' : ''}
+      `,
+      border: `1.5px solid rgba(255, 255, 255, ${0.4 + speed * 0.1})`,
+      boxShadow: `
+        0 ${12 + speed * 6}px ${40 + speed * 20}px rgba(0, 0, 0, ${0.2 + speed * 0.05}),
+        inset 0 2px 0 rgba(255, 255, 255, ${0.4 + speed * 0.1}),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.1),
+        0 0 ${30 + speed * 15}px rgba(255, 255, 255, ${0.15 + speed * 0.05})
+      `,
+      transition: isDragging ? 'all 0.05s ease-out' : 'all 0.2s ease-out',
+    };
+  }, [useFallback, internalMouse, velocity, isDragging, scale]);
 
   // 高级液体物理更新循环
   const updateAdvancedLiquidSystem = useCallback(() => {
@@ -375,6 +543,8 @@ export default function DelayedFilter({
 
   // 更新滤镜效果
   const updateFilter = useCallback(() => {
+    if (useFallback) return; // 移动端降级模式不使用SVG滤镜
+    
     const canvas = canvasRef.current;
     const feImage = feImageRef.current;
     const feDisplacementMap = feDisplacementMapRef.current;
@@ -431,7 +601,7 @@ export default function DelayedFilter({
       'scale',
       (maxScale / canvasDPI).toString()
     );
-  }, [width, height, fragment, internalMouse, canvasDPI, isDragging, hyperLiquidFragment]);
+  }, [width, height, fragment, internalMouse, canvasDPI, isDragging, hyperLiquidFragment, useFallback]);
 
   // 处理鼠标移动
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -449,9 +619,11 @@ export default function DelayedFilter({
     }
   }, [draggable, isDragging]);
 
-  // 处理触摸事件
+  // 处理触摸事件（移动端优化）
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!containerRef.current || !draggable || e.touches.length !== 1) return;
+    
+    e.preventDefault(); // 防止滚动
 
     const rect = containerRef.current.getBoundingClientRect();
     const touch = e.touches[0];
@@ -481,56 +653,88 @@ export default function DelayedFilter({
     updateFilter();
   }, [updateFilter]);
 
+  // 移动端实时动画更新
+  useEffect(() => {
+    if (useFallback) {
+      let animationId: number;
+      
+      const updateMobileAnimation = () => {
+        if (isDragging || Math.abs(velocity.x) > 0.001 || Math.abs(velocity.y) > 0.001) {
+          // 强制重新渲染以更新clip-path
+          setInternalMouse(prev => ({ ...prev }));
+          animationId = requestAnimationFrame(updateMobileAnimation);
+        }
+      };
+      
+      if (isDragging) {
+        animationId = requestAnimationFrame(updateMobileAnimation);
+      }
+      
+      return () => {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+      };
+    }
+  }, [useFallback, isDragging, velocity.x, velocity.y]);
+
+  // 获取移动端降级样式
+  const mobileStyles = generateMobileFallback();
+
   return (
     <>
-      {/* SVG滤镜定义 */}
-      <svg
-        ref={svgRef}
-        xmlns="http://www.w3.org/2000/svg"
-        width="0"
-        height="0"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          pointerEvents: 'none',
-          zIndex: -1,
-        }}
-      >
-        <defs>
-          <filter
-            id={filterId}
-            filterUnits="userSpaceOnUse"
-            colorInterpolationFilters="sRGB"
-            x="0"
-            y="0"
-            width={width.toString()}
-            height={height.toString()}
-          >
-            <feImage
-              ref={feImageRef}
-              id={`${filterId}_map`}
+      {/* SVG滤镜定义（仅桌面端） */}
+      {!useFallback && (
+        <svg
+          ref={svgRef}
+          xmlns="http://www.w3.org/2000/svg"
+          width="0"
+          height="0"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none',
+            zIndex: -1,
+          }}
+        >
+          <defs>
+            <filter
+              id={filterId}
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+              x="0"
+              y="0"
               width={width.toString()}
               height={height.toString()}
-            />
-            <feDisplacementMap
-              ref={feDisplacementMapRef}
-              in="SourceGraphic"
-              in2={`${filterId}_map`}
-              xChannelSelector="R"
-              yChannelSelector="G"
-            />
-          </filter>
-        </defs>
-      </svg>
+            >
+              <feImage
+                ref={feImageRef}
+                id={`${filterId}_map`}
+                width={width.toString()}
+                height={height.toString()}
+              />
+              <feDisplacementMap
+                ref={feDisplacementMapRef}
+                in="SourceGraphic"
+                in2={`${filterId}_map`}
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+        </svg>
+      )}
 
-      {/* 隐藏的canvas用于生成置换图 */}
-      <canvas
-        ref={canvasRef}
-        width={width * canvasDPI}
-        height={height * canvasDPI}
-        style={{ display: 'none' }}
-      />
+      {/* 隐藏的canvas用于生成置换图（仅桌面端） */}
+      {!useFallback && (
+        <canvas
+          ref={canvasRef}
+          width={width * canvasDPI}
+          height={height * canvasDPI}
+          style={{ display: 'none' }}
+        />
+      )}
 
       {/* 滤镜容器 */}
       <div
@@ -541,17 +745,21 @@ export default function DelayedFilter({
           width: width,
           height: height,
           borderRadius: borderRadius,
-          backdropFilter: `url(#${filterId})`,
+          backdropFilter: useFallback ? mobileStyles.backdropFilter : `url(#${filterId})`,
+          WebkitBackdropFilter: useFallback ? mobileStyles.WebkitBackdropFilter : `url(#${filterId})`,
           cursor: draggable ? 'grab' : 'default',
           pointerEvents: 'auto',
           zIndex: 9999,
           overflow: 'hidden',
-          transform: `scale(${scale})`,
+          transform: useFallback ? mobileStyles.transform : `scale(${scale})`,
           transformOrigin: 'center',
           touchAction: 'none',
           userSelect: 'none',
           WebkitUserSelect: 'none',
           WebkitTouchCallout: 'none',
+          // 应用移动端样式
+          ...(useFallback ? mobileStyles : {}),
+          // 用户自定义样式
           ...style,
         }}
         onMouseMove={handleMouseMove}
@@ -612,4 +820,4 @@ export const delayedFilterFragments = {
 };
 
 export type { DelayedFilterProps, UV, Mouse, TextureResult, FragmentFunction };
-export { smoothStep, length, roundedRectSDF, texture, generateId }; 
+export { smoothStep, length, roundedRectSDF, texture, generateId, isMobileDevice, supportsSVGFilters, supportsBackdropFilter }; 
