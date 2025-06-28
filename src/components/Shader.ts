@@ -55,7 +55,7 @@ export class Shader {
   width: number;
   height: number;
   fragment: FragmentFunction;
-  canvasDPI: number = 1;
+  canvasDPI: number = 0.1;
   id: string;
   offset: number = 10;
 

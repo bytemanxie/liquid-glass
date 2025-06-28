@@ -114,7 +114,7 @@ export default function LiquidGlass({
         user-select: none;
         white-space: nowrap;
       `;
-      
+    
       // 创建React内容的挂载点
       const reactRoot = document.createElement('div');
       contentWrapper.appendChild(reactRoot);
@@ -141,33 +141,6 @@ export default function LiquidGlass({
       }
     };
   }, [createShader]);
-
-  // 如果没有提供children，创建一个临时的Shader来显示默认文本
-  useEffect(() => {
-    if (!children && shaderRef.current?.container) {
-      const existingContent = shaderRef.current.container.querySelector('.default-content');
-      if (!existingContent) {
-        const defaultContentWrapper = document.createElement('div');
-        defaultContentWrapper.className = 'default-content';
-        defaultContentWrapper.style.cssText = `
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          color: white;
-          font-size: 16px;
-          font-weight: 600;
-          text-align: center;
-          pointer-events: none;
-          z-index: 1;
-          text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-          user-select: none;
-          white-space: nowrap;
-        `;
-        shaderRef.current.container.appendChild(defaultContentWrapper);
-      }
-    }
-  }, [draggable, children]);
 
   // 这个组件现在只是一个控制器，不渲染任何可见内容
   return null;

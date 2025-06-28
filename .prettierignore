@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.yarn/
+.pnp.*
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Environment files
+.env*
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# NYC test coverage
+.nyc_output/
+
+# Compiled binary addons
+build/Release
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Lock files
+package-lock.json
+yarn.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Public assets (usually shouldn't be formatted)
+public/
+
+# Generated files
+*.generated.* 

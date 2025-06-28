@@ -37,6 +37,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       label: '效果实验室',
       icon: <ControlPlatformIcon />,
     },
+    {
+      value: '/backdrop-test',
+      label: 'Backdrop测试',
+      icon: <ControlPlatformIcon />,
+    },
+    {
+      value: '/svg-filter-demo',
+      label: 'SVG滤镜演示',
+      icon: <LayersIcon />,
+    },
   ];
 
   const handleLinkClick = () => {

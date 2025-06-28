@@ -70,3 +70,9 @@ src/
 └── app/(dashboard)/
     └── page.tsx             # 主页 - 延迟效果滑块演示
 ```
+
+# SVG Filter 兼容性说明
+
+![SVG Filter 兼容性示意图](./public/svgFilter.png)
+
+Safari似乎不兼容url语法
